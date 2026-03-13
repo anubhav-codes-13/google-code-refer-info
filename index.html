@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>final.py — Detailed Summary</title>
+    <link rel="stylesheet" href="anubhav.css">
+</head>
+
+<body>
+
+    <!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+    <div class="hero">
+        <div class="hero-badge">Code Reference · final.py</div>
+        <h1><span>final.py</span> — Complete Technical Summary</h1>
+        <p class="hero-sub">
+            A full end-to-end NLP topic modeling pipeline: customer support text → BERT embeddings
+            → UMAP → HDBSCAN → BERTopic → Gemini LLM topic naming → noise reassignment → output.
+        </p>
+        <div class="hero-tags">
+            <span class="hero-tag">TensorFlow</span>
+            <span class="hero-tag">HuggingFace Transformers</span>
+            <span class="hero-tag">BERTopic</span>
+            <span class="hero-tag">UMAP</span>
+            <span class="hero-tag">HDBSCAN</span>
+            <span class="hero-tag">Gemini LLM</span>
+            <span class="hero-tag">Gemma 27B</span>
+            <span class="hero-tag">Google-Internal (CNS / Evergreen)</span>
+            <span class="hero-tag">Pandas</span>
+            <span class="hero-tag">Sklearn</span>
+            <span class="hero-tag">Concurrent Futures</span>
+            <span class="hero-tag">Constrained JSON Generation</span>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+     LAYOUT
+══════════════════════════════════════════ -->
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-title">Contents</div>
+            <nav>
+                <a href="#overview">Overview</a>
+                <a href="#dataflow">Data Flow</a>
+                <a href="#techstack">Tech Stack</a>
+                <a href="#step1"><span class="step-num">01</span> Imports &amp; Setup</a>
+                <a href="#step2"><span class="step-num">02</span> BERT Model Loading</a>
+                <a href="#step3"><span class="step-num">03</span> Mean Pooling</a>
+                <a href="#step4"><span class="step-num">04</span> Batch Embeddings</a>
+                <a href="#step5"><span class="step-num">05</span> Cosine Similarity</a>
+                <a href="#step6"><span class="step-num">06</span> Logger Class</a>
+                <a href="#step7"><span class="step-num">07</span> PromptContext Class</a>
+                <a href="#step8"><span class="step-num">08</span> LLMPromptGenerator</a>
+                <a href="#step9"><span class="step-num">09</span> JSON Cleaning</a>
+                <a href="#step10"><span class="step-num">10</span> GeminiDocumentParser</a>
+                <a href="#step11"><span class="step-num">11</span> BERTopic Setup</a>
+                <a href="#step12"><span class="step-num">12</span> HDBSCAN Optimization</a>
+                <a href="#step13"><span class="step-num">13</span> LLM Topic Labeling</a>
+                <a href="#step14"><span class="step-num">14</span> Merge Similar Topics</a>
+                <a href="#step15"><span class="step-num">15</span> Reassign Noise</a>
+                <a href="#step16"><span class="step-num">16</span> Semantic Search</a>
+                <a href="#step17"><span class="step-num">17</span> Feedback Extraction</a>
+                <a href="#step18"><span class="step-num">18</span> Data Loading</a>
+                <a href="#step19"><span class="step-num">19</span> Full Pipeline Run</a>
+                <a href="#step20"><span class="step-num">20</span> TF-IDF + BERT Clustering</a>
+                <a href="#step21"><span class="step-num">21</span> Gemma Cluster Naming</a>
+                <a href="#step22"><span class="step-num">22</span> Similarity Utilities</a>
+            </nav>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main">
+
+            <!-- ── OVERVIEW ── -->
+            <section id="overview">
+                <p class="page-section-title">What Is This File?</p>
+                <div class="overview-grid">
+                    <div class="ov-card">
+                        <div class="ov-card-icon">🗂️</div>
+                        <div class="ov-card-label">Purpose</div>
+                        <div class="ov-card-value">Topic Modeling Pipeline</div>
+                    </div>
+                    <div class="ov-card">
+                        <div class="ov-card-icon">📊</div>
+                        <div class="ov-card-label">Input</div>
+                        <div class="ov-card-value">Customer Support Text</div>
+                    </div>
+                    <div class="ov-card">
+                        <div class="ov-card-icon">🏷️</div>
+                        <div class="ov-card-label">Output</div>
+                        <div class="ov-card-value">LLM-Named Topic Labels</div>
+                    </div>
+                    <div class="ov-card">
+                        <div class="ov-card-icon">🌐</div>
+                        <div class="ov-card-label">Environment</div>
+                        <div class="ov-card-value">Google-Internal Colab</div>
+                    </div>
+                    <div class="ov-card">
+                        <div class="ov-card-icon">📏</div>
+                        <div class="ov-card-label">Lines of Code</div>
+                        <div class="ov-card-value">~1,494 lines</div>
+                    </div>
+                    <div class="ov-card">
+                        <div class="ov-card-icon">⚙️</div>
+                        <div class="ov-card-label">Steps</div>
+                        <div class="ov-card-value">22 major components</div>
+                    </div>
+                </div>
+
+                <p style="color:var(--text-muted); margin-bottom:24px;">
+                    <strong style="color:#fff;">final.py</strong> is a complete, production-grade NLP topic modeling
+                    system built
+                    at Google. It processes thousands of customer support contact reasons (Google Fi / Google services),
+                    automatically discovers thematic clusters using sentence embeddings and density-based clustering,
+                    and then uses Gemini / Gemma LLMs to assign human-readable names to each discovered topic.
+                    The result is written back to Google Sheets as a labeled dataset.
+                </p>
+            </section>
+
+            <!-- ── DATA FLOW ── -->
+            <section id="dataflow">
+                <div class="flow-section">
+                    <h2>End-to-End Data Flow</h2>
+                    <div class="flow">
+                        <div class="flow-step">📋 Google Sheets (4 tabs)</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">🧹 Deduplicated DataFrame</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">📝 "reason for contact" text</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">🤖 MiniLM-L6-v2 (384-dim vectors)</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">📉 UMAP (384→5 dims)</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">🔵 HDBSCAN clustering</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">📚 BERTopic (c-TF-IDF keywords)</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">🧠 Gemini names each topic</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">🔀 Merge similar topic names</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">🔇 Reassign noise docs</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">📊 TF-IDF + BERT meta-clustering</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">🦎 Gemma 27B meta-names</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">✅ Write back to Google Sheets</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── TECH STACK TABLE ── -->
+            <section id="techstack">
+                <p class="page-section-title">Technology Stack</p>
+                <div class="tech-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Technology</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="td-component">Text Embeddings</td>
+                                <td class="td-tech">all-MiniLM-L6-v2 (HuggingFace + TF)</td>
+                                <td>Convert text → 384-dim dense vectors</td>
+                            </tr>
+                            <tr>
+                                <td class="td-component">Dimensionality Reduction</td>
+                                <td class="td-tech">UMAP (5 components)</td>
+                                <td>Reduce 384-dim → 5-dim for clustering</td>
+                            </tr>
+                            <tr>
+                                <td class="td-component">Clustering</td>
+                                <td class="td-tech">HDBSCAN (density-based)</td>
+                                <td>Group similar documents into topics</td>
+                            </tr>
+                            <tr>
+                                <td class="td-component">Topic Modeling Framework</td>
+                                <td class="td-tech">BERTopic</td>
+                                <td>Orchestrate UMAP + HDBSCAN + vectorizer</td>
+                            </tr>
+                            <tr>
+                                <td class="td-component">Topic Keyword Extraction</td>
+                                <td class="td-tech">CountVectorizer (c-TF-IDF)</td>
+                                <td>Find representative keywords per topic</td>
+                            </tr>
+                            <tr>
+                                <td class="td-component">LLM Topic Naming</td>
+                                <td class="td-tech">Gemini (Goldfish / GEMINI_M_IT)</td>
+                                <td>Generate human-readable topic names</td>
+                            </tr>
+                            <tr>
+                                <td class="td-component">Meta-Cluster Naming</td>
+                                <td class="td-tech">Gemma 27B (fine-tuned, internal)</td>
+                                <td>Name umbrella KMeans clusters</td>
+                            </tr>
+                            <tr>
+                                <td class="td-component">Parallelism</td>
+                                <td class="td-tech">concurrent.futures ThreadPoolExecutor</td>
+                                <td>50–500 parallel LLM API workers</td>
+                            </tr>
+                            <tr>
+                                <td class="td-component">Structured LLM Output</td>
+                                <td class="td-tech">FST Constraint Schema (google3)</td>
+                                <td>Force valid JSON output from LLM</td>
+                            </tr>
+                            <tr>
+                                <td class="td-component">Data Storage</td>
+                                <td class="td-tech">Google Sheets + CNS + Google Drive</td>
+                                <td>Read/write data and models</td>
+                            </tr>
+                            <tr>
+                                <td class="td-component">Environment</td>
+                                <td class="td-tech">Google-internal Colab (colabtools)</td>
+                                <td>Notebook runtime + adhoc_import</td>
+                            </tr>
+                            <tr>
+                                <td class="td-component">Secondary Clustering</td>
+                                <td class="td-tech">TF-IDF + BERT + KMeans</td>
+                                <td>Cluster topic names themselves</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <hr class="section-divider" />
+            <p class="page-section-title">Step-by-Step Breakdown</p>
+
+            <!-- ═══════════════════════════════
+         STEP 1
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step1">
+                <div class="step-header">
+                    <span class="step-badge">STEP 01</span>
+                    <span class="step-title">Core Imports &amp; GPU Setup</span>
+                    <span class="step-lines">Lines 1–7</span>
+                </div>
+                <div class="step-body">
+                    <pre><code><span class="kw">import</span> tensorflow <span class="kw">as</span> tf
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> tqdm <span class="kw">import</span> tqdm
+
+<span class="cm"># gpus = tf.config.experimental.list_physical_devices('GPU')</span>
+<span class="cm"># for gpu in gpus:</span>
+<span class="cm">#     print("Name:", gpu.name, "  Type:", gpu.device_type)</span></code></pre>
+                    <ul>
+                        <li><strong>TensorFlow</strong> is the primary ML framework used throughout the entire file —
+                            all BERT inference, tensor math, and embedding ops run through TF.</li>
+                        <li><strong>NumPy</strong> is used for array manipulation and mathematical operations (e.g.,
+                            <code>np.linspace</code>, <code>np.concatenate</code>).
+                        </li>
+                        <li><strong>tqdm</strong> provides progress bars for all loops (embedding generation, HDBSCAN
+                            search).</li>
+                        <li>GPU detection code is <strong>commented out</strong> — was originally used to verify GPU
+                            availability in the CNS/Colab environment, but left as reference.</li>
+                        <li>This entire file runs inside a <strong>Google-internal Colab notebook</strong> environment
+                            with access to CNS storage, internal Python packages (<code>google3</code>,
+                            <code>colabtools</code>), and Evergreen model serving.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 2
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step2">
+                <div class="step-header">
+                    <span class="step-badge">STEP 02</span>
+                    <span class="step-title">Load BERT Embedding Model — <code>get_bert_model()</code></span>
+                    <span class="step-lines">Lines 9–50</span>
+                </div>
+                <div class="step-body">
+                    <div class="what-how">
+                        <div class="what-box">
+                            <div class="box-label">What it does</div>
+                            <p>Loads the <code>all-MiniLM-L6-v2</code> sentence transformer model from a Google-internal
+                                CNS (Colossus Network Storage) path and returns a config, tokenizer, and model object.
+                            </p>
+                        </div>
+                        <div class="how-box">
+                            <div class="box-label">Why this model</div>
+                            <p><code>all-MiniLM-L6-v2</code> is a lightweight, fast BERT variant specifically optimized
+                                for sentence-level embeddings. It produces 384-dimensional vectors with strong semantic
+                                quality at a fraction of BERT-large's compute cost.</p>
+                        </div>
+                    </div>
+
+                    <h3>Key Variables</h3>
+                    <ul>
+                        <li><code>base_loc</code> = <code>"/cns/ph-d/home/dscc-topic-models-insights/hf_models"</code> —
+                            CNS storage root where HuggingFace models are stored.</li>
+                        <li><code>checkpoint</code> = <code>"all-MiniLM-L6-v2"</code> — the model folder name.</li>
+                        <li><code>config.json</code> — BERT configuration file loaded via
+                            <code>BertConfig.from_pretrained()</code>.
+                        </li>
+                        <li><code>tf_model.h5</code> — TensorFlow weights file (referenced but loaded implicitly by
+                            <code>TFAutoModel</code>).
+                        </li>
+                    </ul>
+
+                    <h3>Loading Process</h3>
+                    <ol>
+                        <li>Constructs full CNS paths using <code>os.path.join()</code>.</li>
+                        <li>Prints the config file path and model path for logging/debugging.</li>
+                        <li>Loads <code>BertConfig</code> from <code>config.json</code> and prints it.</li>
+                        <li>Loads <code>BertTokenizer</code> with <code>return_tensor='tf'</code> and
+                            <code>truncation=True</code>.
+                        </li>
+                        <li>Loads <code>TFAutoModel.from_pretrained()</code> with <code>from_pt=False</code> (indicating
+                            it's a native TF checkpoint, not PyTorch).</li>
+                        <li>Returns <code>(config, tokenizer, model)</code>.</li>
+                    </ol>
+
+                    <pre><code>config, tokenizer, bert_model = <span class="fn">get_bert_model</span>()  <span class="cm"># Line 50 — called at module level</span></code></pre>
+
+                    <div class="callout note">
+                        <div class="callout-icon">ℹ️</div>
+                        <div class="callout-body">
+                            <div class="callout-title">Global State</div>
+                            <code>config</code>, <code>tokenizer</code>, and <code>bert_model</code> are assigned as
+                            <strong>module-level globals</strong> at line 50. Every subsequent embedding function uses
+                            these globals directly without passing them as arguments.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 3
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step3">
+                <div class="step-header">
+                    <span class="step-badge">STEP 03</span>
+                    <span class="step-title">Mean Pooling — <code>mean_pooling_tf()</code></span>
+                    <span class="step-lines">Lines 40–48</span>
+                </div>
+                <div class="step-body">
+                    <div class="what-how">
+                        <div class="what-box">
+                            <div class="box-label">What it does</div>
+                            <p>Converts per-token BERT output (shape: <code>batch × seq_len × 384</code>) into a single
+                                sentence-level embedding vector per input sentence (shape: <code>batch × 384</code>).
+                            </p>
+                        </div>
+                        <div class="how-box">
+                            <div class="box-label">Why mean pooling</div>
+                            <p>BERT produces one vector per token. To get a single sentence embedding, you average all
+                                real token embeddings — weighted by the attention mask (ignoring padding tokens). This
+                                outperforms using just the <code>[CLS]</code> token for semantic similarity tasks.</p>
+                        </div>
+                    </div>
+
+                    <pre><code><span class="kw">def</span> <span class="fn">mean_pooling_tf</span>(model_output, attention_mask):
+    token_embeddings = model_output[<span class="nm">0</span>]   <span class="cm"># shape: (batch, seq_len, 384)</span>
+    input_mask_expanded = tf.cast(
+        tf.broadcast_to(
+            tf.expand_dims(attention_mask, <span class="nm">-1</span>),  <span class="cm"># (batch, seq_len, 1)</span>
+            token_embeddings.shape             <span class="cm"># broadcast → (batch, seq_len, 384)</span>
+        ),
+        tf.float32
+    )
+    a = tf.math.reduce_sum(token_embeddings * input_mask_expanded, axis=<span class="nm">1</span>)
+    b = tf.clip_by_value(tf.math.reduce_sum(input_mask_expanded, axis=<span class="nm">1</span>), <span class="nm">1e-9</span>, tf.float32.max)
+    <span class="kw">return</span> a / b   <span class="cm"># weighted average → (batch, 384)</span></code></pre>
+
+                    <h3>Step-by-step math</h3>
+                    <ol>
+                        <li><strong>Extract token embeddings:</strong> <code>model_output[0]</code> — the hidden states
+                            tensor, shape <code>(batch, seq_len, 384)</code>.</li>
+                        <li><strong>Expand mask:</strong> <code>attention_mask</code> is shape
+                            <code>(batch, seq_len)</code>. Unsqueeze to <code>(batch, seq_len, 1)</code>, then broadcast
+                            to <code>(batch, seq_len, 384)</code> and cast to float32.
+                        </li>
+                        <li><strong>Masked sum (numerator):</strong> Multiply token embeddings by the expanded mask,
+                            then sum over the seq_len dimension → <code>(batch, 384)</code>. Padding positions
+                            contribute zero.</li>
+                        <li><strong>Token count (denominator):</strong> Sum the expanded mask along seq_len → count of
+                            real tokens per sentence. Clipped to minimum <code>1e-9</code> to prevent division by zero.
+                        </li>
+                        <li><strong>Divide:</strong> <code>a / b</code> = mean of real token embeddings.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 4
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step4">
+                <div class="step-header">
+                    <span class="step-badge">STEP 04</span>
+                    <span class="step-title">Batch Embedding Generation — <code>generate_embeddings()</code></span>
+                    <span class="step-lines">Lines 54–80</span>
+                </div>
+                <div class="step-body">
+                    <p>The core function for converting any list of text strings into BERT embeddings in
+                        memory-efficient batches.</p>
+
+                    <h3>Parameters</h3>
+                    <div class="param-table-wrap">
+                        <table class="param-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Default</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>sentences</td>
+                                    <td>—</td>
+                                    <td>List of text strings to embed</td>
+                                </tr>
+                                <tr>
+                                    <td>batch_size</td>
+                                    <td>64</td>
+                                    <td>Number of sentences per BERT forward pass</td>
+                                </tr>
+                                <tr>
+                                    <td>off_set</td>
+                                    <td>0</td>
+                                    <td>Start from batch number N (enables checkpoint resuming)</td>
+                                </tr>
+                                <tr>
+                                    <td>final_embeddings</td>
+                                    <td>None</td>
+                                    <td>Already-generated embeddings to append to; required if off_set != 0</td>
+                                </tr>
+                                <tr>
+                                    <td>normalize</td>
+                                    <td>True</td>
+                                    <td>Whether to L2-normalize output vectors</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>How it works</h3>
+                    <ol>
+                        <li>If <code>off_set == 0</code> and <code>final_embeddings is None</code>: initializes an empty
+                            <code>(0, 384)</code> float array.
+                        </li>
+                        <li>Loops over sentences in steps of <code>batch_size</code>, starting from
+                            <code>off_set * batch_size</code>. Uses <code>tqdm</code> with "Processing..." label.
+                        </li>
+                        <li>For each batch: runs
+                            <code>tokenizer(sentences[i:i+batch_size], return_tensors="tf", padding=True, truncation=True)</code>.
+                        </li>
+                        <li>Runs <code>bert_model(**tokens)</code> — full BERT forward pass.</li>
+                        <li>Applies <code>mean_pooling_tf(embeddings, tokens['attention_mask'])</code> to get one vector
+                            per sentence.</li>
+                        <li>If <code>normalize=True</code>: applies
+                            <code>tf.linalg.normalize(sentence_embeddings_tf, 2, axis=1)</code> — L2 normalization along
+                            the embedding dimension.
+                        </li>
+                        <li>Concatenates batch result onto <code>final_embeddings</code> using
+                            <code>tf.concat([...], axis=0)</code>.
+                        </li>
+                    </ol>
+
+                    <div class="callout warn">
+                        <div class="callout-icon">⚠️</div>
+                        <div class="callout-body">
+                            <div class="callout-title">Checkpoint / Resume Design</div>
+                            The <code>off_set</code> and <code>final_embeddings</code> parameters together allow
+                            resuming an interrupted embedding run from an arbitrary batch index, without re-processing
+                            already-completed sentences.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 5
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step5">
+                <div class="step-header">
+                    <span class="step-badge">STEP 05</span>
+                    <span class="step-title">Cosine Similarity — <code>compute_cosine_similarity()</code></span>
+                    <span class="step-lines">Lines 82–114</span>
+                </div>
+                <div class="step-body">
+                    <div class="what-how">
+                        <div class="what-box">
+                            <div class="box-label">What it does</div>
+                            <p>Computes the full pairwise cosine similarity matrix between two sets of embedding
+                                vectors. Returns a matrix of shape <code>(m, n)</code> where <code>m = len(a)</code>,
+                                <code>n = len(b)</code>.
+                            </p>
+                        </div>
+                        <div class="how-box">
+                            <div class="box-label">Why batched computation</div>
+                            <p>For 50,000 documents, the full similarity matrix would be 50K × 50K = 2.5B values.
+                                Processing in 2,048-row/column blocks keeps each matrix multiplication within GPU/CPU
+                                memory limits.</p>
+                        </div>
+                    </div>
+
+                    <h3>Algorithm</h3>
+                    <ol>
+                        <li><strong>L2 normalize</strong> both inputs: <code>tf.nn.l2_normalize(a, 1)</code>,
+                            <code>tf.nn.l2_normalize(b, 1)</code>. After normalization, the dot product equals cosine
+                            similarity.
+                        </li>
+                        <li><strong>Outer loop</strong> over rows of <code>a</code> in chunks of
+                            <code>_BATCH_SIZE=2048</code>.
+                        </li>
+                        <li><strong>Inner loop</strong> over rows of <code>b</code> in chunks of
+                            <code>_BATCH_SIZE=2048</code>.
+                        </li>
+                        <li>Each block:
+                            <code>tf.matmul(normalize_a[j:j+2048], normalize_b[i:i+2048], transpose_b=True).numpy()</code>
+                            — produces a <code>(2048 × 2048)</code> similarity sub-matrix.
+                        </li>
+                        <li>Column blocks are concatenated into a full row →
+                            <code>np.concatenate(row_dist, axis=1)</code>.
+                        </li>
+                        <li>Row blocks are concatenated into the final matrix →
+                            <code>np.concatenate(final_distance, axis=0)</code>.
+                        </li>
+                        <li>If <code>return_tf=True</code>: converts back to <code>tf.Tensor</code>; otherwise returns
+                            numpy array.</li>
+                    </ol>
+
+                    <pre><code>similarity_matrix = <span class="fn">compute_cosine_similarity</span>(embeddings_a, embeddings_b)
+<span class="cm"># shape: (len(a), len(b)), values in [-1, 1]</span></code></pre>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 6
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step6">
+                <div class="step-header">
+                    <span class="step-badge">STEP 06</span>
+                    <span class="step-title">Logger Class — Real-Time Colab Dashboard</span>
+                    <span class="step-lines">Lines 122–148</span>
+                </div>
+                <div class="step-body">
+                    <p>A custom HTML-based real-time logging utility designed for Jupyter/Colab notebooks. Used by
+                        <code>GeminiDocumentParser</code> to display live progress during long-running LLM jobs.
+                    </p>
+
+                    <h3>Design</h3>
+                    <ul>
+                        <li><strong><code>persistent_logs</code></strong> (list): Grows indefinitely. Stores important
+                            milestone messages as colored HTML <code>&lt;span&gt;</code> elements. These persist across
+                            all display updates.</li>
+                        <li><strong><code>running_logs</code></strong> (<code>deque(maxlen=10)</code>): Rolling window
+                            of the last 10 status messages. Older messages drop off automatically. Shows real-time
+                            iteration progress.</li>
+                    </ul>
+
+                    <h3>Methods</h3>
+                    <ul>
+                        <li><code>info(message, color='black')</code> — Appends colored HTML message to
+                            <code>persistent_logs</code>, then calls <code>update_display()</code>. Used for milestone
+                            events (start, finish, totals). Colors seen in use: <code>'green'</code>,
+                            <code>'red'</code>, <code>'purple'</code>.
+                        </li>
+                        <li><code>running(message)</code> — Appends "Running: {message}" to the rolling
+                            <code>running_logs</code> deque, then calls <code>update_display()</code>. Used every
+                            iteration for current percentage / response time.
+                        </li>
+                        <li><code>update_display()</code> — Calls <code>clear_output(wait=True)</code> to clear the cell
+                            output, then renders <strong>two HTML sections</strong> as a single
+                            <code>IPython.display.HTML</code> call:
+                            <ol>
+                                <li><em>Task Logs:</em> all persistent messages in a <code>&lt;pre&gt;</code> block.
+                                </li>
+                                <li><em>Running Logs:</em> last 10 rolling messages in a <code>&lt;pre&gt;</code> block.
+                                </li>
+                            </ol>
+                        </li>
+                    </ul>
+
+                    <div class="callout info">
+                        <div class="callout-icon">💡</div>
+                        <div class="callout-body">
+                            <div class="callout-title">Why This Design</div>
+                            For parallel LLM jobs with 50–500 concurrent threads completing at different rates, standard
+                            <code>print()</code> flooding would make the notebook unreadable. This provides a clean,
+                            live-updating dashboard without output spam.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 7
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step7">
+                <div class="step-header">
+                    <span class="step-badge">STEP 07</span>
+                    <span class="step-title">PromptContext Class — LLM Prompt Container</span>
+                    <span class="step-lines">Lines 150–200</span>
+                </div>
+                <div class="step-body">
+                    <p>A simple data-class container for all the components that make up a structured LLM prompt. Uses
+                        Python <code>@property</code> / setter syntax for attribute access.</p>
+
+                    <h3>Properties</h3>
+                    <ul>
+                        <li><strong><code>task_context</code></strong> (str): The system-level instruction / task
+                            description given to the LLM. E.g., "Given a list of documents in a cluster, provide a topic
+                            name..."</li>
+                        <li><strong><code>example</code></strong> (str): Few-shot examples showing the LLM the expected
+                            input→output format. Placed between task context and the actual input data.</li>
+                        <li><strong><code>prompt</code></strong> (str): Per-record prompt template that uses Python
+                            <code>.format(**inputs)</code> placeholders. E.g.,
+                            <code>"cluster_id: {cluster_id}\ncluster documents:\n{lines}"</code>.
+                        </li>
+                        <li><strong><code>response_format</code></strong> (dict): Dictionary mapping output field names
+                            to FST schema types. Used to build constrained generation schema.</li>
+                        <li><strong><code>response_schema</code></strong>: Raw FST schema object (alternative to
+                            <code>response_format</code>).
+                        </li>
+                    </ul>
+
+                    <div class="callout warn">
+                        <div class="callout-icon">⚠️</div>
+                        <div class="callout-body">
+                            <div class="callout-title">Bug: Duplicate Setter</div>
+                            Lines 190–200 define the <code>@response_format.setter</code> <strong>four times
+                                identically</strong>. In Python, each new setter definition overwrites the previous one
+                            — only the last definition takes effect. This is a copy-paste bug in the code but does not
+                            break functionality since all four are identical.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 8
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step8">
+                <div class="step-header">
+                    <span class="step-badge">STEP 08</span>
+                    <span class="step-title">LLMPromptGenerator Class — Batch Prompt Iterator</span>
+                    <span class="step-lines">Lines 205–282</span>
+                </div>
+                <div class="step-body">
+                    <p>A Python iterator that, given a DataFrame and a <code>PromptContext</code>, generates formatted
+                        batched LLM prompts. Designed to be consumed by <code>GeminiDocumentParser</code>.</p>
+
+                    <h3>Constructor Parameters</h3>
+                    <div class="param-table-wrap">
+                        <table class="param-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>df</td>
+                                    <td>pd.DataFrame</td>
+                                    <td>Source data. Only <code>id_col + prompt_columns</code> are kept.</td>
+                                </tr>
+                                <tr>
+                                    <td>id_col</td>
+                                    <td>str</td>
+                                    <td>The unique identifier column (e.g., <code>"cluster_id"</code>,
+                                        <code>"case_id"</code>).
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>prompt_columns</td>
+                                    <td>list[str]</td>
+                                    <td>Columns whose values fill the prompt template.</td>
+                                </tr>
+                                <tr>
+                                    <td>skip_ids</td>
+                                    <td>list[str]</td>
+                                    <td>IDs to exclude (already processed). Enables retry/resume logic.</td>
+                                </tr>
+                                <tr>
+                                    <td>batch_size</td>
+                                    <td>int</td>
+                                    <td>Records per LLM call. Warns at &gt;5 (LLMs degrade with too many records).</td>
+                                </tr>
+                                <tr>
+                                    <td>sample_size</td>
+                                    <td>int|float|None</td>
+                                    <td>Subsample: int = absolute N, float = fraction. Random seed 43.</td>
+                                </tr>
+                                <tr>
+                                    <td>system_context</td>
+                                    <td>bool</td>
+                                    <td>Force prepend system context even for batch_size=1.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>System Prompt Template</h3>
+                    <pre><code><span class="st">"You are given {batch_size} data records separated by dotted line. "</span>
+<span class="st">"Given the task below, generate the output in the exact same format as the example. "</span>
+<span class="st">"Always return {id_col} in the output and separate the output for different inputs by dotted line."</span></code></pre>
+
+                    <h3>Key Methods</h3>
+                    <ul>
+                        <li><strong><code>set_prompt_context(prompt_context)</code></strong>: Binds task_context,
+                            example, and prompt from a <code>PromptContext</code> object onto this generator.</li>
+                        <li><strong><code>_generate_batch_prompt(batch)</code></strong>: Formats all records in a batch.
+                            Each record is formatted with <code>self.prompt.format(**inputs)</code>. Records are joined
+                            with <code>"\n" + "-"*40 + "\n"</code> separators. Returns
+                            <code>(full_prompt_string, tuple_of_doc_ids)</code>.
+                        </li>
+                        <li><strong><code>__len__()</code></strong>: Returns
+                            <code>math.ceil(len(df) / batch_size)</code> — total number of batches.
+                        </li>
+                        <li><strong><code>__iter__()</code></strong>: Yields <code>(prompt, doc_ids)</code> one batch at
+                            a time in order.</li>
+                    </ul>
+
+                    <h3>Full Prompt Structure per Batch</h3>
+                    <pre><code>[system_context]
+[task_context]
+[few-shot example]
+[input_separator: "Don't generate output for the above example. Now generate outputs for N inputs..."]
+[record_1 formatted prompt]
+----------------------------------------
+[record_2 formatted prompt]
+----------------------------------------
+[...etc]</code></pre>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 9
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step9">
+                <div class="step-header">
+                    <span class="step-badge">STEP 09</span>
+                    <span class="step-title">JSON Cleaning Utility — <code>clean_json()</code></span>
+                    <span class="step-lines">Lines 299–307</span>
+                </div>
+                <div class="step-body">
+                    <p>A lightweight string post-processor that normalizes LLM-generated JSON strings before attempting
+                        to parse them with <code>json.loads()</code>.</p>
+
+                    <pre><code><span class="kw">def</span> <span class="fn">clean_json</span>(json_str):
+    json_str = json_str.replace(<span class="st">"\n"</span>, <span class="st">""</span>)                    <span class="cm"># Remove newlines</span>
+    json_str = re.sub(<span class="st">r'\s*:\s*'</span>, <span class="st">': '</span>, json_str)           <span class="cm"># Normalize spaces around :</span>
+    json_str = re.sub(<span class="st">r'\s*,\s*'</span>, <span class="st">', '</span>, json_str)           <span class="cm"># Normalize spaces around ,</span>
+    json_str = re.sub(<span class="st">r'\s*\[\s*'</span>, <span class="st">'['</span>, json_str)            <span class="cm"># Remove spaces before [</span>
+    json_str = re.sub(<span class="st">r'\s*\]\s*'</span>, <span class="st">']'</span>, json_str)            <span class="cm"># Remove spaces after ]</span>
+    json_str = re.sub(<span class="st">r'\s*\{\s*'</span>, <span class="st">'{'</span>, json_str)            <span class="cm"># Remove spaces before {</span>
+    json_str = re.sub(<span class="st">r'\s*\}\s*'</span>, <span class="st">'}'</span>, json_str)            <span class="cm"># Remove spaces after }</span>
+    <span class="kw">return</span> json_str</code></pre>
+
+                    <p>Called in <code>_generate_llm_response()</code> after stripping markdown code fences
+                        (<code>```json</code>, <code>```</code>). Even though constrained generation should produce
+                        valid JSON, LLMs sometimes add extra whitespace or formatting artifacts.</p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 10
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step10">
+                <div class="step-header">
+                    <span class="step-badge">STEP 10</span>
+                    <span class="step-title">GeminiDocumentParser Class — Parallel LLM Engine</span>
+                    <span class="step-lines">Lines 309–448</span>
+                </div>
+                <div class="step-body">
+                    <p>The core LLM inference class. Sends prompts to Gemini via Google's internal Evergreen
+                        model-serving API using a large thread pool, collects structured JSON responses, and handles
+                        failures gracefully.</p>
+
+                    <h3>Class-Level Config</h3>
+                    <ul>
+                        <li><code>num_workers = 50</code> — default thread pool size (overridden to 500 for topic
+                            naming).</li>
+                        <li><code>model_urls</code> — dict of internal Gemini model entries:
+                            <ul>
+                                <li><code>GEMINI_M_IT</code> — Gemini medium instruction-tuned</li>
+                                <li><code>GEMINI_M_MMITV</code> — multimodal variant</li>
+                                <li><code>GEMINI_XL_IT</code> — Gemini XL instruction-tuned</li>
+                                <li><code>GEMINI_GOLDFISH</code> — the default model used here</li>
+                                <li><code>GEMINI_S_FLASH</code> — smaller/faster flash variant</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h3>Constructor</h3>
+                    <ul>
+                        <li>Requires either <code>response_format</code> (a dict like
+                            <code>{"cluster_id": schema.text(), "topic_name": schema.text()}</code>) OR a raw
+                            <code>response_schema</code>. Raises <code>ValueError</code> if neither is provided.
+                        </li>
+                        <li>Creates a <code>ModelClient</code> pointing to <code>GEMINI_GOLDFISH</code> with
+                            <code>BULK_STUB_OPTIONS</code> — this enables automatic quota-aware retries, designed for
+                            high-volume batch inference.
+                        </li>
+                        <li>Builds a <code>response_config</code> with FST constrained generation: wraps the schema in
+                            <code>schema.json(schema.object(response=schema.array(schema.nested(**response_format))))</code>
+                            — this forces the LLM to output a JSON array matching the specified schema exactly.
+                        </li>
+                        <li>Initializes <code>self.llm_response = dict()</code> and
+                            <code>self.unparsed_id = dict()</code> for tracking results and failures.
+                        </li>
+                    </ul>
+
+                    <h3><code>parse(prompt_generator)</code> — Main Execution Method</h3>
+                    <ol>
+                        <li>Creates a <code>Logger</code> and starts a wall-clock timer.</li>
+                        <li>Checks <code>self.llm_response</code> and <code>self.unparsed_id</code> — if non-empty
+                            (i.e., this is a retry run), builds <code>exclude_ids</code> from
+                            <code>get_parsed_doc_ids()</code>.
+                        </li>
+                        <li>Opens a <code>ThreadPoolExecutor(max_workers=num_workers)</code>.</li>
+                        <li>Iterates <code>prompt_generator</code>: skips batches where all <code>doc_ids</code> are in
+                            <code>exclude_ids</code>, otherwise submits
+                            <code>executor.submit(self._generate_llm_response, prompt)</code>. Stores
+                            <code>futures[future] = doc_ids</code>.
+                        </li>
+                        <li>Logs total document count, total futures submitted, total excluded IDs.</li>
+                        <li>Iterates <code>concurrent.futures.as_completed(futures)</code> — processes results as they
+                            complete (non-blocking, out-of-order):
+                            <ul>
+                                <li>If <code>response</code> is a list →
+                                    <code>self.llm_response[doc_ids] = response</code> (success).
+                                </li>
+                                <li>Otherwise → <code>self.unparsed_id[doc_ids] = response</code> (failure/raw string).
+                                </li>
+                            </ul>
+                        </li>
+                        <li>Tracks rolling mean response time with <code>deque(maxlen=10)</code>.</li>
+                        <li>Logs each iteration's progress: completion %, parsed doc_ids, individual response_time,
+                            rolling mean_response_time.</li>
+                        <li>Handles <code>KeyboardInterrupt</code>: shuts down executor cleanly with
+                            <code>cancel_futures=True</code>.
+                        </li>
+                        <li>Logs total elapsed time at the end.</li>
+                    </ol>
+
+                    <h3><code>_generate_llm_response(prompt)</code> — Single LLM Call</h3>
+                    <ol>
+                        <li>Times the call with <code>time.time()</code>.</li>
+                        <li>Calls <code>self.client.generate(prompt, config=self.response_config)</code>.</li>
+                        <li>Converts to text: <code>content_api.as_text(response)</code>.</li>
+                        <li>Strips markdown fences: <code>.replace("```json","").replace("```","").strip()</code>.</li>
+                        <li>Cleans with <code>clean_json()</code>.</li>
+                        <li>Parses: <code>json.loads(response_str)['response']</code>.</li>
+                        <li>Returns <code>(response_array, elapsed_time)</code> on success, or
+                            <code>(raw_string, elapsed_time)</code> on <code>Exception</code>.
+                        </li>
+                    </ol>
+
+                    <h3><code>get_response_df()</code> — Build Results DataFrame</h3>
+                    <ul>
+                        <li>Iterates <code>self.llm_response</code>. For each
+                            <code>(doc_ids_tuple, response_list)</code>:
+                        </li>
+                        <li>Asserts <code>len(keys) == len(values)</code> (batch size matches response count).</li>
+                        <li>For each <code>(key, value)</code> pair: verifies
+                            <code>str(key) == str(value[self._doc_id])</code> — i.e., the LLM returned the correct ID in
+                            its response. If mismatch → moves to <code>unparsed_id</code>.
+                        </li>
+                        <li>Returns <code>pd.DataFrame(final_frame)</code> of all validated responses.</li>
+                    </ul>
+
+                    <h3><code>get_parsed_doc_ids()</code> — Build Skip Set for Retries</h3>
+                    <p>Returns a dict of all successfully parsed and validated doc_ids, used by subsequent
+                        <code>parse()</code> calls to skip already-complete records.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 11
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step11">
+                <div class="step-header">
+                    <span class="step-badge">STEP 11</span>
+                    <span class="step-title">BERTopic Setup — Model Factory</span>
+                    <span class="step-lines">Lines 450–555</span>
+                </div>
+                <div class="step-body">
+
+                    <h3>Imports</h3>
+                    <ul>
+                        <li><code>BERTopic</code> and <code>HDBSCAN</code> — loaded via Google-internal
+                            <code>adhoc_import.Google3Head</code> with custom build target
+                            <code>//third_party/py/hdbscan:test_hdbscan</code> (non-standard build system).
+                        </li>
+                        <li><code>UMAP</code> — from standard PyPI package.</li>
+                        <li><code>CountVectorizer</code> — from sklearn for c-TF-IDF keyword extraction.</li>
+                    </ul>
+
+                    <h3>DEFAULT_STOP_WORDS (Lines 473–516)</h3>
+                    <p>A custom Python <code>set</code> of ~300 English stopwords, more comprehensive than sklearn's
+                        built-in <code>'english'</code> list. Includes contractions (<code>'ve</code>, <code>n't</code>,
+                        <code>'m</code>, <code>'re</code>, <code>'d</code>, <code>'11</code>) and numbers spelled out
+                        (<code>forty</code>, <code>sixty</code>, <code>hundred</code>). Passed to
+                        <code>CountVectorizer</code> so these words are excluded from topic keywords.
+                    </p>
+
+                    <h3><code>create_bertopic_model()</code> — Factory Function</h3>
+                    <div class="param-table-wrap">
+                        <table class="param-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Default</th>
+                                    <th>Purpose</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>n_neighbors</td>
+                                    <td>15</td>
+                                    <td>UMAP: number of local neighbors for manifold learning</td>
+                                </tr>
+                                <tr>
+                                    <td>n_components</td>
+                                    <td>5</td>
+                                    <td>UMAP: target dimensionality (384 → 5)</td>
+                                </tr>
+                                <tr>
+                                    <td>min_cluster_size</td>
+                                    <td>50</td>
+                                    <td>HDBSCAN: minimum documents required to form a cluster</td>
+                                </tr>
+                                <tr>
+                                    <td>min_samples</td>
+                                    <td>5</td>
+                                    <td>HDBSCAN: core point threshold (controls noise sensitivity)</td>
+                                </tr>
+                                <tr>
+                                    <td>min_samples_frac</td>
+                                    <td>None</td>
+                                    <td>If set, min_samples = int(min_cluster_size × frac)</td>
+                                </tr>
+                                <tr>
+                                    <td>min_df</td>
+                                    <td>0.005</td>
+                                    <td>CountVectorizer: ignore words appearing in fewer than 0.5% of docs</td>
+                                </tr>
+                                <tr>
+                                    <td>max_df</td>
+                                    <td>0.995</td>
+                                    <td>CountVectorizer: ignore words appearing in more than 99.5% of docs</td>
+                                </tr>
+                                <tr>
+                                    <td>ngram_range</td>
+                                    <td>(1,1)</td>
+                                    <td>Unigrams only in topic keywords</td>
+                                </tr>
+                                <tr>
+                                    <td>diversity</td>
+                                    <td>0.7</td>
+                                    <td>MMR diversity score for topic word selection (0=no diversity, 1=max)</td>
+                                </tr>
+                                <tr>
+                                    <td>reduce_topics</td>
+                                    <td>False</td>
+                                    <td>If int: auto-reduce to that many topics after fitting</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>Three-Stage Pipeline Built</h3>
+                    <ol>
+                        <li><strong>UMAP</strong>:
+                            <code>UMAP(n_neighbors=n_neighbors, n_components=n_components, low_memory=True, min_dist=0.00, metric='euclidean', verbose=True, random_state=43)</code>
+                            — <code>min_dist=0.0</code> creates tighter clusters; euclidean metric; fixed seed for
+                            reproducibility.
+                        </li>
+                        <li><strong>HDBSCAN</strong>: <code>cluster_selection_method='eom'</code> (Excess of Mass —
+                            better for variable-density clusters), <code>prediction_data=True</code> (needed for later
+                            soft-clustering), <code>approx_min_span_tree=True</code> (faster approximation).</li>
+                        <li><strong>BERTopic</strong>: <code>top_n_words=15</code> (15 keywords per topic),
+                            <code>low_memory=True</code>, <code>language="english"</code>. The UMAP and HDBSCAN models
+                            are injected as custom components.
+                        </li>
+                    </ol>
+
+                    <p>A second definition of <code>create_bertopic_model</code> (lines 1106–1134) replaces the first —
+                        it differs only by using a <code>PatchedVectorizer</code> subclass (a trivial <code>pass</code>
+                        subclass of <code>CountVectorizer</code>) instead of <code>CountVectorizer</code> directly, and
+                        passes <code>vectorizer_model</code> positionally differently.</p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 12
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step12">
+                <div class="step-header">
+                    <span class="step-badge">STEP 12</span>
+                    <span class="step-title">HDBSCAN Hyperparameter Optimization —
+                        <code>optimize_hdbscan()</code></span>
+                    <span class="step-lines">Lines 558–657</span>
+                </div>
+                <div class="step-body">
+                    <p>A grid-search function that systematically tests combinations of HDBSCAN hyperparameters to find
+                        the configuration that maximizes cluster cohesion while minimizing noise.</p>
+
+                    <h3>Supporting Functions</h3>
+                    <ul>
+                        <li><strong><code>get_cluster_similarity(cluster_emb)</code></strong>: Converts cluster
+                            embeddings to TF tensor → computes full cosine similarity matrix → returns
+                            <code>sim_mat.sum() / N²</code> (mean pairwise similarity, including diagonal). Higher =
+                            more cohesive cluster.
+                        </li>
+                        <li><strong><code>compute_cluster_metrics(emb, topics, noise_threshold=0.1)</code></strong>:
+                            Groups document indices by topic label. For each topic, extracts the corresponding
+                            embeddings and computes <code>get_cluster_similarity</code>. Returns a DataFrame with
+                            columns: <code>Topic</code>, <code>cluster_sim</code>, <code>cluster_size</code>,
+                            <code>noise</code> (True if <code>cluster_sim &lt; noise_threshold</code> or
+                            <code>Topic == -1</code>).
+                        </li>
+                    </ul>
+
+                    <h3>Search Space</h3>
+                    <ul>
+                        <li><code>min_cluster_size</code>:
+                            <code>np.linspace(search_space_min, search_space_max, 20) * n_docs/1000 + 1</code>, then
+                            deduplicated integers with 1 removed. Scales with dataset size.
+                        </li>
+                        <li><code>min_samples_frac</code>: Fixed values <code>[0.2, 0.4, 0.6, 0.8, 1.0]</code>.</li>
+                    </ul>
+
+                    <h3>For Each Parameter Combination</h3>
+                    <ol>
+                        <li>Creates a fresh HDBSCAN model via <code>create_bertopic_model(...).hdbscan_model</code>.
+                        </li>
+                        <li>Fits on <code>reduced_emb</code> (UMAP output — 5-dim) for efficient clustering.</li>
+                        <li>Gets cluster labels <code>topics = model.labels_</code>.</li>
+                        <li>Computes metrics using <code>compute_cluster_metrics(actual_emb, topics)</code> — uses
+                            original 384-dim embeddings for quality evaluation (not UMAP output).</li>
+                        <li>Separates noise clusters from real clusters.</li>
+                        <li>Computes aggregate metrics:
+                            <ul>
+                                <li><strong><code>wg_avg_sim</code></strong>: Weighted average similarity (weighted by
+                                    cluster size × 100).</li>
+                                <li><strong><code>avg_sim</code></strong>: Harmonic mean of per-cluster similarity
+                                    (<code>scipy.stats.hmean</code>).</li>
+                                <li><strong><code>noise_pct</code></strong>: Percentage of total documents in noise
+                                    clusters.</li>
+                                <li><strong><code>n_cluster</code></strong>: Total number of non-noise topics found.
+                                </li>
+                            </ul>
+                        </li>
+                        <li>Skips duplicate <code>(min_cluster_size, min_samples)</code> combos via
+                            <code>worked_models</code> cache.
+                        </li>
+                    </ol>
+
+                    <p>Returns <code>(optimization_metrics_df, all_model_metrics_df)</code>. The user then inspects
+                        <code>op_df["sim_noise"]</code> (<code>avg_sim / noise_pct</code>) and
+                        <code>op_df["n_noise"]</code> (<code>n_cluster / noise_pct</code>) to choose the best
+                        configuration.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 13
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step13">
+                <div class="step-header">
+                    <span class="step-badge">STEP 13</span>
+                    <span class="step-title">LLM Topic Labeling — <code>generate_llm_topic_names()</code></span>
+                    <span class="step-lines">Lines 659–791</span>
+                </div>
+                <div class="step-body">
+                    <p>Uses Gemini to generate short, human-readable names for each topic cluster discovered by BERTopic
+                        + HDBSCAN.</p>
+
+                    <h3>Prompt Design</h3>
+                    <ul>
+                        <li><strong>Task context:</strong> "Given a list of documents which are part of a single
+                            cluster, provide a topic name for that cluster. The name should be small, concise and
+                            capture crucial information."</li>
+                        <li><strong>Optional seed topics:</strong> If <code>seed_topic_list</code> is provided, the task
+                            context is extended to prefer matching from a predefined category list.</li>
+                        <li><strong>Few-shot example:</strong> Shows 30 billing-related customer support lines → output:
+                            <code>"Billing Concerns: Additional charges"</code>.
+                        </li>
+                        <li><strong>Per-cluster prompt template:</strong>
+                            <code>"cluster_id: {cluster_id}\ncluster documents:\n{lines}"</code>
+                        </li>
+                        <li><strong>Response schema:</strong>
+                            <code>{"cluster_id": schema.text(), "topic_name": schema.text()}</code>
+                        </li>
+                    </ul>
+
+                    <h3>How <code>generate_llm_topic_names()</code> works</h3>
+                    <ol>
+                        <li>Filters out <code>topic == -1</code> (HDBSCAN noise, unlabeled documents).</li>
+                        <li>For each topic: takes up to the top <strong>30 representative documents</strong> (sorted by
+                            probability), joins them with newlines.</li>
+                        <li>Builds a DataFrame with <code>cluster_id</code> and <code>lines</code> columns.</li>
+                        <li>Creates <code>LLMPromptGenerator</code> with <code>batch_size=1</code> (one cluster per LLM
+                            call for quality).</li>
+                        <li>Creates <code>GeminiDocumentParser</code> with <code>num_workers=500</code> (very high
+                            parallelism for speed).</li>
+                        <li><strong>Retry loop (up to 5 times):</strong> Calls
+                            <code>topic_namer.parse(prompt_generator)</code>, gets <code>get_response_df()</code>. If
+                            not all clusters were named, re-runs only the missing clusters via <code>skip_ids</code>.
+                            Breaks early if all are done.
+                        </li>
+                    </ol>
+
+                    <p>Returns <code>(topic_names_df, topic_namer)</code> where <code>topic_names_df</code> has columns
+                        <code>cluster_id</code> and <code>topic_name</code>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 14
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step14">
+                <div class="step-header">
+                    <span class="step-badge">STEP 14</span>
+                    <span class="step-title">Merge Similar Topics — <code>merge_similar_topic()</code></span>
+                    <span class="step-lines">Lines 795–838</span>
+                </div>
+                <div class="step-body">
+                    <p>Deduplicates semantically similar topic names using agglomerative (hierarchical) clustering on
+                        their embeddings. When two topic names mean the same thing (e.g., "billing dispute" and
+                        "disputed charge"), this function merges them into one representative name.</p>
+
+                    <h3>Parameters</h3>
+                    <ul>
+                        <li><code>input_col_name</code> — column containing topic name strings.</li>
+                        <li><code>output_col_name</code> — new column name for merged result (default:
+                            <code>"final_llm_name"</code>).
+                        </li>
+                        <li><code>volume_col_name</code> — column with frequency counts (default: <code>"vol"</code>).
+                        </li>
+                        <li><code>threshold=0.85</code> — cosine similarity threshold. Topics above this are considered
+                            the same.</li>
+                    </ul>
+
+                    <h3>Algorithm</h3>
+                    <ol>
+                        <li>Gets unique topic names from <code>input_col_name</code>.</li>
+                        <li>Aggregates total volume per unique topic name:
+                            <code>df.groupby(input_col_name)[volume_col_name].sum()</code>.
+                        </li>
+                        <li>Generates sentence embeddings for all unique topic names.</li>
+                        <li>Computes pairwise cosine <strong>distances</strong>:
+                            <code>pdist(embeddings, metric='cosine')</code> — condensed distance matrix.
+                        </li>
+                        <li>Builds hierarchical linkage: <code>linkage(cosine_distances, method='average')</code> —
+                            UPGMA (average linkage agglomerative clustering).</li>
+                        <li>Cuts the dendrogram at <code>distance_threshold = 1 - threshold = 0.15</code>:
+                            <code>fcluster(Z, t=0.15, criterion='distance')</code>.
+                        </li>
+                        <li>Groups topics by their hierarchical cluster label.</li>
+                        <li>Picks the <strong>highest-volume topic name</strong> per cluster as the representative (most
+                            common phrasing wins).</li>
+                        <li>Maps all original topic names → their cluster representative.</li>
+                        <li>Prints: "Initial unique topics: N → After merging: M".</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 15
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step15">
+                <div class="step-header">
+                    <span class="step-badge">STEP 15</span>
+                    <span class="step-title">Reassign Noise — <code>reassign_noise()</code></span>
+                    <span class="step-lines">Lines 842–886</span>
+                </div>
+                <div class="step-body">
+                    <p>HDBSCAN labels some documents as noise (topic <code>-1</code>). These are documents that don't
+                        fit cleanly into any cluster. This function re-assigns them to the most semantically similar
+                        real topic using cosine similarity.</p>
+
+                    <h3>How it works</h3>
+                    <ol>
+                        <li>Extracts all unique text strings labeled as <code>"noise"</code>.</li>
+                        <li>Gets all unique topic name strings (excluding noise).</li>
+                        <li>Generates embeddings for <strong>topic names</strong> (short strings) using default batch
+                            size.</li>
+                        <li>Generates embeddings for <strong>noise texts</strong> (longer strings) using
+                            <code>batch_size=512</code>.
+                        </li>
+                        <li>Computes full pairwise cosine similarity matrix: shape
+                            <code>(n_topics × n_noise_texts)</code>.
+                        </li>
+                        <li>Iterates all <code>(topic_i, noise_text_j)</code> pairs. If similarity &gt;
+                            <code>threshold</code> (default 0.65) → records as a valid pair; otherwise → records in
+                            <code>not_pairs</code> (for debugging).
+                        </li>
+                        <li>For each noise text: selects the <strong>highest-similarity topic</strong> as its new
+                            assignment (<code>groupby("seqy").idxmax()</code>).</li>
+                        <li>Noise texts with no match above threshold remain labeled <code>"noise"</code> (filled with
+                            <code>fillna("noise")</code>).
+                        </li>
+                        <li>Left-merges <code>denoised_topic_name</code> back onto main DataFrame. Documents already in
+                            real topics are unaffected (their <code>denoised_topic_name</code> is filled from
+                            <code>topic_name_col</code>).
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 16
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step16">
+                <div class="step-header">
+                    <span class="step-badge">STEP 16</span>
+                    <span class="step-title">Semantic Topic Search</span>
+                    <span class="step-lines">Lines 888–955</span>
+                </div>
+                <div class="step-body">
+                    <h3><code>create_topic_vectors(topic_model, top_n_words)</code></h3>
+                    <p>Creates a single representative embedding vector per BERTopic topic, based on the top 10 keywords
+                        in that topic and their c-TF-IDF importance scores.</p>
+                    <ol>
+                        <li>Gets sorted topic list from <code>topic_model.topics.keys()</code>, excludes topic
+                            <code>-1</code>.
+                        </li>
+                        <li>For each topic, collects the top <code>top_n=10</code> words and their c-TF-IDF weights.
+                        </li>
+                        <li>Generates BERT embeddings for all topic words across all topics in one batch
+                            (batch_size=128).</li>
+                        <li>For each topic: takes
+                            <code>np.average(word_embeddings, weights=c_tfidf_weights, axis=0)</code> —
+                            c-TF-IDF-weighted mean of word embeddings.
+                        </li>
+                        <li>Concatenates all topic embeddings → <code>tf.Tensor</code> of shape
+                            <code>(n_topics, 384)</code>.
+                        </li>
+                    </ol>
+
+                    <h3><code>find_topics(search_term, topic_embeddings, topic_model, top_n=10)</code></h3>
+                    <p>Semantic search over discovered topics.</p>
+                    <ol>
+                        <li>Embeds the search query string.</li>
+                        <li>Computes cosine similarity to all topic embedding vectors.</li>
+                        <li>Sorts by similarity (<code>tf.argsort</code>), takes top-N.</li>
+                        <li>Returns a DataFrame with columns <code>topics</code> (topic IDs) and <code>sim_score</code>.
+                        </li>
+                    </ol>
+
+                    <pre><code><span class="cm"># Example usage:</span>
+results = <span class="fn">find_topics</span>([<span class="st">"billing dispute"</span>], topic_embeddings, topic_model, top_n=<span class="nm">5</span>)
+<span class="cm"># Returns top 5 topics most related to "billing dispute"</span></code></pre>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 17
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step17">
+                <div class="step-header">
+                    <span class="step-badge">STEP 17</span>
+                    <span class="step-title">Feedback Extraction Prompt &amp; Schema</span>
+                    <span class="step-lines">Lines 957–1011</span>
+                </div>
+                <div class="step-body">
+                    <h3><code>_EMOTION_PROMPT_TEMPLATE</code></h3>
+                    <p>A prompt template for extracting structured feedback points from raw customer review text.</p>
+                    <ul>
+                        <li><strong>Role:</strong> "You are a feedback specialist, with speciality in analysing customer
+                            feedbacks."</li>
+                        <li><strong>Task:</strong> Extract the main concern(s) expressed by the customer for a
+                            particular product.</li>
+                        <li><strong>Multi-feedback rule:</strong> A single review can contain multiple feedback points —
+                            keep them as separate items in the JSON array.</li>
+                        <li><strong>Uniqueness rule:</strong> Avoid repeating the same type of feedback for different
+                            aspects.</li>
+                        <li><strong>Output format:</strong> <code>{"Output":["Feedback_1","Feedback_2"]}</code></li>
+                        <li><strong>Examples provided:</strong>
+                            <ul>
+                                <li>Watch review with app UI complaint + hardware defect → 2 separate feedback strings.
+                                </li>
+                                <li>Fitbit review where positive points are filtered out → only negative: "Poor customer
+                                    service".</li>
+                            </ul>
+                        </li>
+                        <li><code>{input_text}</code> — placeholder for the actual review text.</li>
+                    </ul>
+
+                    <h3>Schema &amp; Config</h3>
+                    <pre><code>emotion_schema = {<span class="st">"Output"</span>: schema.text()}
+emotion_constraint = schema.json(schema.object(
+    response=schema.nested(values=schema.nested(**emotion_schema))
+))
+emotion_config = model_client.make_generation_config(constraint=emotion_constraint)</code></pre>
+
+                    <h3><code>parse_output(result)</code></h3>
+                    <p>A fallback string-splitting parser: <code>result.split(',')[0].split(':')[1].strip()</code> —
+                        extracts the first feedback string from a raw text response. Used when JSON parsing fails.</p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 18
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step18">
+                <div class="step-header">
+                    <span class="step-badge">STEP 18</span>
+                    <span class="step-title">Data Loading from Google Sheets</span>
+                    <span class="step-lines">Lines 1013–1050</span>
+                </div>
+                <div class="step-body">
+                    <h3><code>read_data_drive(file_name)</code></h3>
+                    <p>Loads a CSV from Google Drive using <code>colabtools.drive.LoadFile()</code>, decodes as UTF-8,
+                        and parses with <code>pd.read_csv(io.StringIO(...))</code>.</p>
+
+                    <h3>Google Sheets Loading (Lines 1020–1050)</h3>
+                    <ul>
+                        <li>Loads <strong>4 separate worksheet tabs</strong> from the same Google Sheets document using
+                            a <code>read_sheet()</code> function (defined elsewhere in the notebook environment).</li>
+                        <li>Concatenates them:
+                            <code>df_ed = pd.concat([df_ed_1, df_ed_2, df_ed_3, df_ed_4]).reset_index(drop=True)</code>.
+                        </li>
+                        <li>Deduplicates on <code>'case_id'</code>:
+                            <code>df_ed.drop_duplicates(subset=['case_id'], inplace=True)</code>.
+                        </li>
+                        <li>Loads a <code>break_topic</code> sheet for filtering already-processed cases.</li>
+                        <li>Creates <code>scratch_data</code> = rows not already in <code>break_topic</code>.</li>
+                        <li>Copies into <code>google_fi_df</code> as the working DataFrame.</li>
+                        <li>Sets <code>google_fi_df['text'] = google_fi_df['reason for contact']</code>.</li>
+                        <li>Drops rows with null <code>text</code>.</li>
+                        <li>Creates <code>docs = google_fi_df.text.to_list()</code> — the list of strings to embed.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 19
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step19">
+                <div class="step-header">
+                    <span class="step-badge">STEP 19</span>
+                    <span class="step-title">Full Pipeline Execution — End-to-End Run</span>
+                    <span class="step-lines">Lines 1051–1228</span>
+                </div>
+                <div class="step-body">
+                    <p>This is the section where all previously defined components are wired together into a sequential
+                        pipeline run.</p>
+
+                    <h3>1. Generate Text Embeddings</h3>
+                    <pre><code>text_embeddings = <span class="fn">generate_embeddings</span>(docs, batch_size=<span class="nm">256</span>, normalize=<span class="kw">False</span>)
+text_embeddings = text_embeddings.numpy()  <span class="cm"># Convert TF tensor → NumPy for UMAP</span></code></pre>
+                    <p><code>normalize=False</code> here because UMAP works better with unnormalized vectors (preserves
+                        magnitude differences).</p>
+
+                    <h3>2. Reduce Dimensions with UMAP</h3>
+                    <pre><code>umap_model = <span class="cl">UMAP</span>(n_neighbors=<span class="nm">15</span>, n_components=<span class="nm">5</span>, low_memory=<span class="kw">True</span>,
+              min_dist=<span class="nm">0.00</span>, metric=<span class="st">'euclidean'</span>, verbose=<span class="kw">True</span>, random_state=<span class="nm">43</span>)
+reduced_emb = umap_model.fit_transform(text_embeddings)  <span class="cm"># shape: (N, 5)</span></code></pre>
+
+                    <h3>3. Optimize HDBSCAN Parameters</h3>
+                    <pre><code>op_df, c_df = <span class="fn">optimize_hdbscan</span>(google_fi_df, reduced_emb, text_embeddings)
+op_df[<span class="st">"sim_noise"</span>] = op_df.avg_sim / op_df.noise_pct   <span class="cm"># higher = better</span>
+op_df[<span class="st">"n_noise"</span>]   = op_df.n_cluster / op_df.noise_pct  <span class="cm"># higher = better</span></code></pre>
+
+                    <h3>4. Fit Final BERTopic Model</h3>
+                    <pre><code>topic_model = <span class="fn">create_bertopic_model</span>(
+    n_neighbors=<span class="nm">15</span>, n_components=<span class="nm">5</span>,
+    min_cluster_size=<span class="nm">13</span>, min_samples_frac=<span class="nm">0.2</span>,
+    min_df=<span class="nm">0.02</span>, max_df=<span class="nm">0.98</span>, ngram_range=(<span class="nm">1</span>,<span class="nm">1</span>), diversity=<span class="nm">0.7</span>
+)
+topics, probabilities = topic_model.fit_transform(
+    embeddings=text_embeddings, documents=docs
+)</code></pre>
+
+                    <h3>5. Assign Topics to Documents</h3>
+                    <pre><code>google_fi_df[<span class="st">"topics"</span>] = topics
+google_fi_df[<span class="st">"probabilities"</span>] = probabilities</code></pre>
+
+                    <h3>6. Name Topics with Gemini LLM</h3>
+                    <pre><code>llm_topic_names_df, _ = <span class="fn">generate_llm_topic_names</span>(google_fi_df)</code></pre>
+
+                    <h3>7. Add Volume Data and Merge Similar Names</h3>
+                    <pre><code>vol_df = google_fi_df.groupby(<span class="st">"topics"</span>).case_id.count().reset_index(name=<span class="st">"vol"</span>)
+vol_df.rename(columns={<span class="st">"topics"</span>: <span class="st">"cluster_id"</span>}, inplace=<span class="kw">True</span>)
+llm_topic_names_df.cluster_id = llm_topic_names_df.cluster_id.astype(<span class="st">'int'</span>)
+llm_topic_names_df = llm_topic_names_df.merge(vol_df, on=<span class="st">"cluster_id"</span>, how=<span class="st">"left"</span>)
+<span class="fn">merge_similar_topic</span>(llm_topic_names_df, <span class="st">"topic_name"</span>, threshold=<span class="nm">0.85</span>)</code></pre>
+
+                    <h3>8. Map Topic Names Back to Each Document</h3>
+                    <pre><code>names_map = llm_topic_names_df[[<span class="st">"cluster_id"</span>,<span class="st">"final_llm_name"</span>]].set_index(<span class="st">"cluster_id"</span>).to_dict(orient=<span class="st">"index"</span>)
+google_fi_df[<span class="st">'topics'</span>] = google_fi_df[<span class="st">'topics'</span>].astype(int)
+google_fi_df[<span class="st">"final_llm_name"</span>] = google_fi_df.topics.map(
+    <span class="kw">lambda</span> topic: names_map.get(topic, {<span class="st">"final_llm_name"</span>: <span class="st">"noise"</span>})[<span class="st">"final_llm_name"</span>]
+)</code></pre>
+
+                    <h3>9. Reassign Noise Documents</h3>
+                    <pre><code>google_fi_df = <span class="fn">reassign_noise</span>(google_fi_df, <span class="st">"final_llm_name"</span>, <span class="st">"text"</span>, threshold=<span class="nm">0.50</span>)
+google_fi_df.denoised_topic_name = google_fi_df.denoised_topic_name.str.lower()</code></pre>
+
+                    <h3>10. Secondary Merge and Final Column Renames</h3>
+                    <pre><code><span class="fn">merge_similar_topic</span>(google_fi_df_5, <span class="st">"denoised_topic_name"</span>,
+                    output_col_name=<span class="st">"Merged_Topic"</span>, threshold=<span class="nm">0.5</span>)
+
+google_fi_df.rename(columns={
+    <span class="st">'denoised_topic_name'</span>: <span class="st">'rootcause_topic_name'</span>,
+    <span class="st">'final_llm_name'</span>:       <span class="st">'rootcause_llm_name'</span>,
+    <span class="st">'topics'</span>:              <span class="st">'rootcause_topics'</span>,
+    <span class="st">'probabilities'</span>:       <span class="st">'rootcause_probabilities'</span>
+}, inplace=<span class="kw">True</span>)</code></pre>
+
+                    <h3>11. Write Results Back to Google Sheets</h3>
+                    <pre><code>url = <span class="st">"https://docs.google.com/spreadsheets/d/..."</span>
+<span class="fn">write_sheet</span>(url, <span class="st">"topic_model"</span>, google_fi_df)</code></pre>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 20
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step20">
+                <div class="step-header">
+                    <span class="step-badge">STEP 20</span>
+                    <span class="step-title">TF-IDF + BERT Hybrid Clustering —
+                        <code>combine_tfidf_word2vec()</code></span>
+                    <span class="step-lines">Lines 1283–1342</span>
+                </div>
+                <div class="step-body">
+                    <p>A secondary clustering pass applied to the <em>LLM-generated topic names themselves</em> —
+                        further consolidating them into meta-categories using KMeans.</p>
+
+                    <div class="what-how">
+                        <div class="what-box">
+                            <div class="box-label">What it clusters</div>
+                            <p>The list of fine-grained topic name strings (e.g., "billing dispute", "unexpected
+                                charge", "overcharged on plan") → groups them into 120 meta-clusters.</p>
+                        </div>
+                        <div class="how-box">
+                            <div class="box-label">Why hybrid representations</div>
+                            <p>TF-IDF captures lexical overlap (exact word matches). BERT captures semantic meaning
+                                (paraphrases). Combining them, with BERT weighted 2.5× more, gives robust grouping of
+                                near-duplicate phrasings <em>and</em> semantically related but differently worded names.
+                            </p>
+                        </div>
+                    </div>
+
+                    <h3>Algorithm</h3>
+                    <ol>
+                        <li><strong>TF-IDF matrix:</strong> <code>TfidfVectorizer().fit_transform(categories)</code> —
+                            produces sparse matrix of shape <code>(N_topics, vocab_size)</code>.</li>
+                        <li><strong>BERT embeddings (loop-based):</strong> Processes each category string individually
+                            through <code>tokenizer</code> → <code>bert_model</code> → <code>mean_pooling_tf</code> → L2
+                            normalize. Concatenates into <code>final_embeddings</code> tensor → converts to numpy array
+                            of shape <code>(N_topics, 384)</code>.</li>
+                        <li><strong>Note:</strong> Word2Vec code is fully commented out (was originally planned as a
+                            third representation layer).</li>
+                        <li><strong>Combine representations:</strong>
+                            <code>np.hstack((tfidf_matrix.toarray(), 2.5 * bert_embeddings))</code> — column-wise
+                            stacking with BERT weighted 2.5×.
+                        </li>
+                        <li><strong>KMeans:</strong> <code>KMeans(n_clusters=120).fit(combined_representations)</code> —
+                            clusters topic names into 120 groups.</li>
+                        <li><strong>Group output:</strong>
+                            <code>clustered_categories = {label: [topic_names...]}</code>.
+                        </li>
+                    </ol>
+
+                    <pre><code>num_clusters = <span class="nm">120</span>
+clustered_categories = <span class="fn">combine_tfidf_word2vec</span>(filtered_lst_category, num_clusters)
+<span class="cm"># filtered_lst_category = non-None topic names from google_fi_df.denoised_topic_name.unique()</span></code></pre>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 21
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step21">
+                <div class="step-header">
+                    <span class="step-badge">STEP 21</span>
+                    <span class="step-title">Gemma 27B Meta-Cluster Naming — <code>name_cluster()</code></span>
+                    <span class="step-lines">Lines 1266–1435</span>
+                </div>
+                <div class="step-body">
+                    <h3>Model Used</h3>
+                    <pre><code>client = model_client.<span class="cl">ModelClient</span>(
+    model_url=<span class="st">'evergreen:///mbns/oz/home/courier/sbhupatiraju/gemma_27b_finetuned'</span>,
+    stub_options=model_client.BULK_STUB_OPTIONS,
+)</code></pre>
+                    <p>This is a <strong>custom fine-tuned Gemma 27B model</strong> hosted at an internal Google model
+                        path. Larger than the Gemini models used earlier, likely fine-tuned on customer support data for
+                        better domain understanding.</p>
+
+                    <h3><code>name_cluster(transcript)</code> — Prompt Design</h3>
+                    <p>The prompt provides 5 diverse few-shot examples of topic-list → umbrella-name:</p>
+                    <ul>
+                        <li>Watch complaints → <code>"Watch Functionality and Performance Issues"</code></li>
+                        <li>Battery complaints → <code>"Watch Battery Drain Issues"</code></li>
+                        <li>Store credit issues → <code>"google store credit issue"</code></li>
+                        <li>Pixel 8a promotions → <code>"google fi promotion eligibility/query"</code></li>
+                        <li>Trade-in issues → <code>"trade-in issue/query"</code></li>
+                    </ul>
+                    <p>The prompt uses the same FST constraint schema as the emotion extraction prompt. On exception,
+                        returns the string <code>"None"</code>.</p>
+
+                    <h3>Main Category-Building Loop (Lines 1414–1435)</h3>
+                    <ul>
+                        <li>Iterates over all 120 KMeans clusters (<code>clustered_categories.items()</code>).</li>
+                        <li><strong>Multi-item clusters:</strong> Calls <code>name_cluster(value)</code> to get a
+                            Gemma-generated umbrella name. <code>time.sleep(2)</code> between calls to respect rate
+                            limits.</li>
+                        <li><strong>Name collision handling:</strong> If the returned name already exists in
+                            <code>categories</code>, merges the category lists: <code>old_value_list[0] + value</code>.
+                        </li>
+                        <li><strong>Single-item clusters:</strong> Uses the topic name itself as the key:
+                            <code>categories[value[0]] = value</code>.
+                        </li>
+                        <li><strong>Error handling:</strong> Catches all exceptions, assigns failed clusters to key
+                            <code>None</code>.
+                        </li>
+                    </ul>
+
+                    <p>Final result: <code>categories</code> dict mapping umbrella topic names → lists of fine-grained
+                        sub-topic names.</p>
+
+                    <h3><code>replace_with_key(value)</code> — Apply Category Mapping</h3>
+                    <pre><code><span class="kw">def</span> <span class="fn">replace_with_key</span>(value):
+    <span class="kw">for</span> key, items <span class="kw">in</span> categories.items():
+        <span class="kw">for</span> i <span class="kw">in</span> items:
+            <span class="kw">for</span> j <span class="kw">in</span> i:
+                <span class="kw">if</span> value == j: <span class="kw">return</span> key
+    <span class="kw">return</span> value   <span class="cm"># unchanged if no mapping found</span>
+
+google_fi_df[<span class="st">"Redefined_topic"</span>] = google_fi_df[<span class="st">"denoised_topic_name"</span>].apply(replace_with_key)</code></pre>
+                    <p>Maps each document's fine-grained topic name to its Gemma-generated umbrella category name.</p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════
+         STEP 22
+    ═══════════════════════════════ -->
+            <div class="step-section" id="step22">
+                <div class="step-header">
+                    <span class="step-badge">STEP 22</span>
+                    <span class="step-title">BERT Similarity Evaluation Utilities</span>
+                    <span class="step-lines">Lines 1437–1494</span>
+                </div>
+                <div class="step-body">
+                    <p>Three utility functions for evaluating the quality of topic groupings — used to verify that
+                        topics placed in the same group are genuinely semantically similar.</p>
+
+                    <h3><code>get_bert_embeddings(text_list, tokenizer)</code></h3>
+                    <p>Processes all texts in a single BERT forward pass (no batching). Tokenizes, runs BERT, applies
+                        mean pooling, L2 normalizes, returns numpy array. Simpler than
+                        <code>generate_embeddings()</code> but not memory-efficient for large inputs.
+                    </p>
+
+                    <h3><code>calculate_within_list_similarity(topic_list, tokenizer)</code></h3>
+                    <ol>
+                        <li>Gets BERT embeddings for the list of topics.</li>
+                        <li>Computes full cosine similarity matrix using sklearn:
+                            <code>cosine_similarity(embeddings)</code>.
+                        </li>
+                        <li>Sets diagonal to 0 (removes self-similarity).</li>
+                        <li>Returns <code>(avg_similarity, full_matrix)</code> — average pairwise similarity as a
+                            quality score.</li>
+                    </ol>
+
+                    <h3><code>calculate_all_lists_similarity(topic_dict, tokenizer)</code></h3>
+                    <p>Applies <code>calculate_within_list_similarity</code> to every list in a dictionary. Prints and
+                        returns a dict of
+                        <code>{list_name: {"average_similarity": float, "similarity_matrix": array}}</code>.
+                    </p>
+
+                    <pre><code><span class="cm"># Usage: evaluate quality of each meta-category</span>
+list_similarities = <span class="fn">calculate_all_lists_similarity</span>(categories, tokenizer)
+<span class="cm"># Prints: "Average similarity for [category_name]: 0.73"</span></code></pre>
+
+                    <div class="callout info">
+                        <div class="callout-icon">✅</div>
+                        <div class="callout-body">
+                            <div class="callout-title">Quality Assurance Role</div>
+                            These functions serve as the final quality check on the category groupings produced by the
+                            KMeans + Gemma pipeline. Low average similarity for a category group suggests the Gemma
+                            umbrella name may be grouping semantically unrelated topics together.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FINAL NOTE -->
+            <div
+                style="background: linear-gradient(135deg, rgba(91,138,247,0.08), rgba(167,139,250,0.08)); border: 1px solid var(--border); border-radius: 12px; padding: 28px 32px; margin-top: 12px;">
+                <h3 style="color:#fff; font-size:1rem; margin-bottom:12px;">Summary: What Makes This System Work</h3>
+                <p style="color:var(--text-muted); margin-bottom:14px;">The pipeline is layered in three stages of
+                    abstraction:</p>
+                <ol style="color:var(--text); padding-left:22px;">
+                    <li style="margin-bottom:8px;"><strong style="color:var(--accent);">Stage 1 — Statistical
+                            Clustering:</strong> BERT embeddings + UMAP + HDBSCAN find natural groupings in the raw text
+                        data without any prior knowledge of what topics exist. The grid-search ensures optimal
+                        parameters.</li>
+                    <li style="margin-bottom:8px;"><strong style="color:var(--accent2);">Stage 2 — LLM Naming:</strong>
+                        Gemini translates the statistical clusters into human-readable names. Parallelism (500 workers)
+                        makes this fast at scale. Constrained generation guarantees valid JSON. Retry logic handles
+                        failures.</li>
+                    <li style="margin-bottom:8px;"><strong style="color:var(--accent3);">Stage 3 —
+                            Meta-Consolidation:</strong> TF-IDF + BERT KMeans + Gemma 27B further consolidates the
+                        fine-grained topic names into broader umbrella categories, giving both granular and high-level
+                        views of the data.</li>
+                </ol>
+            </div>
+
+        </main>
+    </div>
+
+</body>
+
+</html>
